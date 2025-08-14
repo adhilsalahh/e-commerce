@@ -1,14 +1,36 @@
 import nodemailer from 'nodemailer';
 
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER || 'demo@example.com',
-    pass: process.env.EMAIL_PASS || 'demo_password'
+// Create transporter with fallback to console logging for development
+const createTransporter = () => {
+  const emailUser = process.env.EMAIL_USER;
+  const emailPass = process.env.EMAIL_PASS;
+  
+  // If no email credentials are provided, use a test account or console logging
+  if (!emailUser || !emailPass) {
+    console.log('⚠️  No email credentials provided. Emails will be logged to console.');
+    return nodemailer.createTransporter({
+      streamTransport: true,
+      newline: 'unix',
+      buffer: true
+    });
   }
-});
+
+  // Configure for Gmail or other SMTP services
+  return nodemailer.createTransporter({
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
+    auth: {
+      user: emailUser,
+      pass: emailPass
+    },
+    connectionTimeout: 10000, // 10 seconds
+    greetingTimeout: 10000,   // 10 seconds
+    socketTimeout: 10000      // 10 seconds
+  });
+};
+
+const transporter = createTransporter();
 
 const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@ecommerce.com';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
@@ -42,11 +64,24 @@ export const sendVerificationEmail = async (email, name, token) => {
   };
 
   try {
-    await transporter.sendMail(mailOptions);
-    console.log('Verification email sent to:', email);
+    const info = await transporter.sendMail(mailOptions);
+    
+    // If using console transport, log the email content
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.log('📧 Verification Email (Console Mode):');
+      console.log('To:', email);
+      console.log('Subject:', mailOptions.subject);
+      console.log('Verification URL:', verifyUrl);
+      console.log('---');
+    } else {
+      console.log('Verification email sent to:', email);
+    }
   } catch (error) {
     console.error('Error sending verification email:', error);
-    throw error;
+    // Don't throw error in development to prevent registration failures
+    if (process.env.NODE_ENV === 'production') {
+      throw error;
+    }
   }
 };
 
@@ -79,11 +114,24 @@ export const sendPasswordResetEmail = async (email, name, token) => {
   };
 
   try {
-    await transporter.sendMail(mailOptions);
-    console.log('Password reset email sent to:', email);
+    const info = await transporter.sendMail(mailOptions);
+    
+    // If using console transport, log the email content
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.log('📧 Password Reset Email (Console Mode):');
+      console.log('To:', email);
+      console.log('Subject:', mailOptions.subject);
+      console.log('Reset URL:', resetUrl);
+      console.log('---');
+    } else {
+      console.log('Password reset email sent to:', email);
+    }
   } catch (error) {
     console.error('Error sending password reset email:', error);
-    throw error;
+    // Don't throw error in development to prevent functionality failures
+    if (process.env.NODE_ENV === 'production') {
+      throw error;
+    }
   }
 };
 
@@ -131,11 +179,25 @@ export const sendOrderConfirmationEmail = async (email, name, orderNumber, items
   };
 
   try {
-    await transporter.sendMail(mailOptions);
-    console.log('Order confirmation email sent to:', email);
+    const info = await transporter.sendMail(mailOptions);
+    
+    // If using console transport, log the email content
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.log('📧 Order Confirmation Email (Console Mode):');
+      console.log('To:', email);
+      console.log('Subject:', mailOptions.subject);
+      console.log('Order:', orderNumber);
+      console.log('Total:', `$${total}`);
+      console.log('---');
+    } else {
+      console.log('Order confirmation email sent to:', email);
+    }
   } catch (error) {
     console.error('Error sending order confirmation email:', error);
-    throw error;
+    // Don't throw error to prevent order processing failures
+    if (process.env.NODE_ENV === 'production') {
+      throw error;
+    }
   }
 };
 
@@ -172,10 +234,25 @@ export const sendOrderStatusUpdateEmail = async (email, name, orderNumber, statu
   };
 
   try {
-    await transporter.sendMail(mailOptions);
-    console.log('Order status update email sent to:', email);
+    const info = await transporter.sendMail(mailOptions);
+    
+    // If using console transport, log the email content
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.log('📧 Order Status Update Email (Console Mode):');
+      console.log('To:', email);
+      console.log('Subject:', mailOptions.subject);
+      console.log('Order:', orderNumber);
+      console.log('Status:', status);
+      if (trackingNumber) console.log('Tracking:', trackingNumber);
+      console.log('---');
+    } else {
+      console.log('Order status update email sent to:', email);
+    }
   } catch (error) {
     console.error('Error sending order status update email:', error);
-    throw error;
+    // Don't throw error to prevent status update failures
+    if (process.env.NODE_ENV === 'production') {
+      throw error;
+    }
   }
 };
