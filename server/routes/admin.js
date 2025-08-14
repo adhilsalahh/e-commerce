@@ -106,12 +106,33 @@ router.get('/products', (req, res) => {
         return res.status(500).json({ message: 'Database error' });
       }
 
-      const formattedProducts = products.map(product => ({
-        ...product,
-        images: JSON.parse(product.images || '[]'),
-        colors: JSON.parse(product.colors || '[]'),
-        sizes: JSON.parse(product.sizes || '[]')
-      }));
+      // Parse JSON fields with error handling
+      const formattedProducts = products.map(product => {
+        let images = [];
+        let colors = [];
+        let sizes = [];
+        try {
+          images = JSON.parse(product.images || '[]');
+        } catch (e) {
+          console.error(`Error parsing images for product ID ${product.id}:`, e);
+        }
+        try {
+          colors = JSON.parse(product.colors || '[]');
+        } catch (e) {
+          console.error(`Error parsing colors for product ID ${product.id}:`, e);
+        }
+        try {
+          sizes = JSON.parse(product.sizes || '[]');
+        } catch (e) {
+          console.error(`Error parsing sizes for product ID ${product.id}:`, e);
+        }
+        return {
+          ...product,
+          images,
+          colors,
+          sizes
+        };
+      });
 
       res.json({
         products: formattedProducts,
