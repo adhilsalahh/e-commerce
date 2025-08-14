@@ -46,7 +46,7 @@ const Login = () => {
 
   // Show message from registration redirect
   useEffect(() => {
-    if (location.state?.message) {
+    if (location.state && typeof location.state === 'object' && location.state.message) {
       setError(location.state.message);
     }
   }, [location.state]);

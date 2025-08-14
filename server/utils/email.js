@@ -8,7 +8,7 @@ const createTransporter = () => {
   // If no email credentials are provided, use a test account or console logging
   if (!emailUser || !emailPass) {
     console.log('⚠️  No email credentials provided. Emails will be logged to console.');
-    return nodemailer.createTransporter({
+    return nodemailer.createTransport({
       streamTransport: true,
       newline: 'unix',
       buffer: true
@@ -16,7 +16,7 @@ const createTransporter = () => {
   }
 
   // Configure for Gmail or other SMTP services
-  return nodemailer.createTransporter({
+  return nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 587,
     secure: false,
