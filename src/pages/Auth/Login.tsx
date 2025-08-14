@@ -38,11 +38,18 @@ const Login = () => {
       await login(data.email, data.password);
       navigate(from, { replace: true });
     } catch (error: any) {
-      setError(error.response?.data?.message || 'Login failed');
+      setError(error.message || 'Login failed');
     } finally {
       setLoading(false);
     }
   };
+
+  // Show message from registration redirect
+  useEffect(() => {
+    if (location.state?.message) {
+      setError(location.state.message);
+    }
+  }, [location.state]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">

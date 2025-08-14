@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { Eye, EyeOff, Lock, CheckCircle } from 'lucide-react';
-import axios from 'axios';
+import { useAuth } from '../../contexts/AuthContext';
 
 const schema = yup.object({
   password: yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
@@ -23,6 +23,7 @@ const ResetPassword = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const { resetPassword } = useAuth();
 
   const {
     register,
@@ -36,13 +37,13 @@ const ResetPassword = () => {
     try {
       setLoading(true);
       setError('');
-      await axios.post(`/api/auth/reset-password/${token}`, { password: data.password });
+      await resetPassword(token!, data.password);
       setSuccess(true);
       setTimeout(() => {
         navigate('/login');
       }, 3000);
     } catch (error: any) {
-      setError(error.response?.data?.message || 'Password reset failed');
+      setError(error.message || 'Password reset failed');
     } finally {
       setLoading(false);
     }

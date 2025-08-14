@@ -1,26 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { CheckCircle, XCircle, Mail } from 'lucide-react';
-import axios from 'axios';
+import { useAuth } from '../../contexts/AuthContext';
 
 const VerifyEmail = () => {
   const { token } = useParams();
   const [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const { verifyEmail } = useAuth();
 
   useEffect(() => {
     if (token) {
-      verifyEmail();
+      handleVerifyEmail();
     }
   }, [token]);
 
-  const verifyEmail = async () => {
+  const handleVerifyEmail = async () => {
     try {
-      const response = await axios.get(`/api/auth/verify/${token}`);
+      await verifyEmail(token!);
       setSuccess(true);
     } catch (error: any) {
-      setError(error.response?.data?.message || 'Email verification failed');
+      setError(error.message || 'Email verification failed');
     } finally {
       setLoading(false);
     }

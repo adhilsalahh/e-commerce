@@ -42,10 +42,12 @@ const Register = () => {
       await registerUser(data.name, data.email, data.password);
       setSuccess('Registration successful! Please check your email to verify your account.');
       setTimeout(() => {
-        navigate('/login');
-      }, 3000);
+        navigate('/login', { 
+          state: { message: 'Please check your email and verify your account before logging in.' }
+        });
+      }, 2000);
     } catch (error: any) {
-      setError(error.response?.data?.message || 'Registration failed');
+      setError(error.message || 'Registration failed');
     } finally {
       setLoading(false);
     }

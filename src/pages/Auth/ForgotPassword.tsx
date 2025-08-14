@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { Mail, ArrowLeft } from 'lucide-react';
-import axios from 'axios';
+import { useAuth } from '../../contexts/AuthContext';
 
 const schema = yup.object({
   email: yup.string().email('Invalid email').required('Email is required')
@@ -16,6 +16,7 @@ const ForgotPassword = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
+  const { forgotPassword } = useAuth();
 
   const {
     register,
@@ -30,10 +31,10 @@ const ForgotPassword = () => {
       setLoading(true);
       setError('');
       setSuccess('');
-      await axios.post('/api/auth/forgot-password', data);
+      await forgotPassword(data.email);
       setSuccess('If your email is registered, you will receive a password reset link.');
     } catch (error: any) {
-      setError(error.response?.data?.message || 'Failed to send reset link');
+      setError(error.message || 'Failed to send reset link');
     } finally {
       setLoading(false);
     }
